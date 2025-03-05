@@ -1,19 +1,20 @@
-     FROM node:16 AS build
+# Use the official Node.js image as a base
+FROM node:14
 
-     WORKDIR /app
+# Set the working directory inside the container
+WORKDIR /app
 
-   # Copy local node_modules to avoid network dependency issues
-     COPY package.json package-lock.json ./
-    RUN npm config set timeout 600000 \
-    && npm config set registry https://registry.npmmirror.com \
-   && npm config set strict-ssl false
+# Copy package.json and package-lock.json files to the working directory
+COPY package*.json ./
 
- COPY . .
- RUN npm install --offline || npm install --legacy-peer-deps --force
+# Install dependencies
+RUN npm install
 
- RUN npm run build
+# Copy the rest of the application code to the working directory
+COPY . .
 
- FROM nginx:alpine
- COPY --from=build /app/build /usr/share/nginx/html
+# Expose port 3000 for the application
 EXPOSE 3000
-CMD ["nginx", "-g", "daemon off;"]
+
+# Command to run the application
+CMD ["npm", "start"]
