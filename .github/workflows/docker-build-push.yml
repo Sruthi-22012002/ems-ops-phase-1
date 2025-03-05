@@ -5,6 +5,9 @@ on:
     branches:
       - main  # Change branch as needed
   workflow_dispatch:  # Allows manual trigger
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build-and-push:
