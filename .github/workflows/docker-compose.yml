@@ -3,11 +3,15 @@ name: Build and Push Frontend & Backend to Azure ACR
 on:
   push:
     branches:
-      - main  # Trigger the workflow when pushing to the main branch
+      - main  # Trigger on push to main
   pull_request:
     branches:
-      - main  # Trigger the workflow on pull requests to main
-  workflow_dispatch:  # Allows manual triggering from GitHub Actions
+      - main  # Trigger on PR to main
+  workflow_dispatch:  # Allows manual trigger
+
+permissions:
+  id-token: write  # ✅ Required for Azure OIDC authentication
+  contents: read   # ✅ Required to read repo contents
 
 jobs:
   build-and-push:
@@ -24,9 +28,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Log in to ACR
+      - name: Log in to Azure Container Registry (ACR)
         run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
+          az acr login --name ${{ secrets.AZURE_ACR_NAME }}
 
       - name: Build Docker Images
         run: |
@@ -34,8 +38,8 @@ jobs:
 
       - name: Push Docker Images to ACR
         run: |
-          docker push applicationimageregistry.azurecr.io/react-frontend:latest
-          docker push applicationimageregistry.azurecr.io/springboot-backend:latest
+          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/react-frontend:latest
+          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/springboot-backend:latest
 
       - name: Log out from Docker
         run: docker logout ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
