@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to ACR
+name: Build and Push frontend Docker Image to ACR
 
 on:
   push:
@@ -37,10 +37,10 @@ jobs:
       - name: Set working directory
         run: cd /home/sruthi/ems-ops-phase-1/react-hooks-frontend
 
-      - name: Build Docker Image
+      - name: Force Build Docker Image
         working-directory: /home/sruthi/ems-ops-phase-1/react-hooks-frontend
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest -f Dockerfile .
+          docker build --no-cache -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest -f Dockerfile .
 
       - name: Push Docker Image to ACR
         working-directory: /home/sruthi/ems-ops-phase-1/react-hooks-frontend
