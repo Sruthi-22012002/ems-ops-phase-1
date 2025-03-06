@@ -3,8 +3,8 @@ name: Build and Push Docker Image to ACR
 on:
   push:
     branches:
-      - main  # Change branch as needed
-  workflow_dispatch:  # Allows manual trigger
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,10 +18,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensures full repo checkout
+          fetch-depth: 0
 
-      - name: Change to correct working directory
-        run: cd react-hooks-frontend
+      - name: Debug - List Files
+        run: ls -lR
 
       - name: Log in to Azure
         uses: azure/login@v1
@@ -35,12 +35,10 @@ jobs:
           az acr login --name ${{ secrets.ACR_NAME }}
 
       - name: Build Docker Image
-        working-directory: react-hooks-frontend
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest .
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest -f react-hooks-frontend/Dockerfile react-hooks-frontend
 
       - name: Push Docker Image to ACR
-        working-directory: react-hooks-frontend
         run: |
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
 
