@@ -1,56 +1,40 @@
-version: '3.8'
-on: push
-services:
-  # React Frontend Service
-  frontend:
-    build:
-      context: ./react-hooks-frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3002:80"  # React will be served on port 3000
-    networks:
-      - frontend_network
-    depends_on:
-      - backend
+name: Build and Push Frontend & Backend to Azure ACR
 
-  # Spring Boot Backend Service
-  backend:
-    build:
-      context: ./springboot-backend
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8080"  # Spring Boot app on port 8080
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/employees
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 12345
-    depends_on:
-      - database
-    networks:
-      - frontend_network
-      - backend_network
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow when pushing to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger the workflow on pull requests to main
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
-  # MySQL Database Service
-  database:
-    image: mysql:8
-    environment:
-      MYSQL_DATABASE: employees
-      MYSQL_ROOT_PASSWORD: 12345
-    ports:
-      - "3306:3306"  # Database accessible on port 3306 (optional)
-    volumes:
-      - mysql-data:/var/lib/mysql  # Persistent volume for database
-    networks:
-      - backend_network
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
 
-# Network Configuration to Isolate Services
-networks:
-  frontend_network:
-    driver: bridge
-  backend_network:
-    driver: bridge
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-# Persistent Volume for MySQL Database
-volumes:
-  mysql-data:
-    driver: local
+      - name: Log in to Azure Container Registry
+        run: |
+          echo "${{ secrets.AZURE_ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_ACR_NAME }}.azurecr.io -u ${{ secrets.AZURE_ACR_USERNAME }} --password-stdin
+
+      - name: Build Docker Images
+        run: |
+          docker-compose -f docker-compose.yml build
+
+      - name: Tag Docker Images
+        run: |
+          docker tag applicationimageregistry.azurecr.io/react-frontend:latest ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/react-frontend:latest
+          docker tag applicationimageregistry.azurecr.io/springboot-backend:latest ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/springboot-backend:latest
+
+      - name: Push Docker Images to ACR
+        run: |
+          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/react-frontend:latest
+          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/springboot-backend:latest
+
+      - name: Log out from Docker
+        run: docker logout ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
+
