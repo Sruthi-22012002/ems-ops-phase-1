@@ -2,7 +2,7 @@
 
      WORKDIR /app
 
-   # Copy local node_modules to avoid network dependency issues
+  
      COPY package.json package-lock.json ./
     RUN npm config set timeout 600000 \
     && npm config set registry https://registry.npmmirror.com \
