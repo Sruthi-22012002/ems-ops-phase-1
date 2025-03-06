@@ -1,7 +1,4 @@
-    Sudo nano docker-compose.yml
-    ```
-```bash
-    version: '3.8'
+version: '3.8'
 
 services:
   # React Frontend Service
