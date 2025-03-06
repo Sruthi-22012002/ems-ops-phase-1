@@ -1,41 +1,59 @@
-name: Build and Push Docker Image to ACR
+    Sudo nano docker-compose.yml
+    ```
+```bash
+    version: '3.8'
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:  # Allows manual trigger
-permissions:
-  id-token: write
-  contents: read
+services:
+  # React Frontend Service
+  frontend:
+    build:
+      context: ./react-hooks-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3002:80"  # React will be served on port 3000
+    networks:
+      - frontend_network
+    depends_on:
+      - backend
 
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  # Spring Boot Backend Service
+  backend:
+    build:
+      context: ./springboot-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"  # Spring Boot app on port 8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/employees
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 12345
+    depends_on:
+      - database
+    networks:
+      - frontend_network
+      - backend_network
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  # MySQL Database Service
+  database:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: employees
+      MYSQL_ROOT_PASSWORD: 12345
+    ports:
+      - "3306:3306"  # Database accessible on port 3306 (optional)
+    volumes:
+      - mysql-data:/var/lib/mysql  # Persistent volume for database
+    networks:
+      - backend_network
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+# Network Configuration to Isolate Services
+networks:
+  frontend_network:
+    driver: bridge
+  backend_network:
+    driver: bridge
 
-      - name: Log in to ACR
-        run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
-
-      - name: Build Docker Image
-        run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest ./react-hooks-frontend
-
-      - name: Push Docker Image to ACR
-        run: |
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
-
-      - name: Log out of Docker
-        run: docker logout
-
+# Persistent Volume for MySQL Database
+volumes:
+  mysql-data:
+    driver: local
