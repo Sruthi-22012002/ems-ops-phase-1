@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0
 
       - name: Debug - List Files
-        run: ls -lR
+        run: ls -lR /home/sruthi/ems-ops-phase-1
 
       - name: Log in to Azure
         uses: azure/login@v1
@@ -34,11 +34,16 @@ jobs:
         run: |
           az acr login --name ${{ secrets.ACR_NAME }}
 
+      - name: Set working directory
+        run: cd /home/sruthi/ems-ops-phase-1/react-hooks-frontend
+
       - name: Build Docker Image
+        working-directory: /home/sruthi/ems-ops-phase-1/react-hooks-frontend
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest -f react-hooks-frontend/Dockerfile react-hooks-frontend
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest -f Dockerfile .
 
       - name: Push Docker Image to ACR
+        working-directory: /home/sruthi/ems-ops-phase-1/react-hooks-frontend
         run: |
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
 
