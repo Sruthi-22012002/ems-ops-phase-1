@@ -1,5 +1,5 @@
 version: '3.8'
-
+on: push
 services:
   # React Frontend Service
   frontend:
