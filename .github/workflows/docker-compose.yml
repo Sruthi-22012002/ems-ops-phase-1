@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest .
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest ./react-hooks-frontend
 
       - name: Push Docker Image to ACR
         run: |
