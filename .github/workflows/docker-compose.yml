@@ -30,7 +30,7 @@ jobs:
 
       - name: Log in to Azure Container Registry (ACR)
         run: |
-          az acr login --name ${{ secrets.AZURE_ACR_NAME }}
+          az acr login --name ${{ secrets.ACR_NAME }}
 
       - name: Build Docker Images
         run: |
@@ -38,9 +38,9 @@ jobs:
 
       - name: Push Docker Images to ACR
         run: |
-          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/react-frontend:latest
-          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/springboot-backend:latest
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/react-frontend:latest
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/springboot-backend:latest
 
       - name: Log out from Docker
-        run: docker logout ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
+        run: docker logout ${{ secrets.ACR_NAME }}.azurecr.io
 
