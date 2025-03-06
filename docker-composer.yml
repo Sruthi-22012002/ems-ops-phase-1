@@ -17,6 +17,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures full repo checkout
+
+      - name: Change to correct working directory
+        run: cd react-hooks-frontend
 
       - name: Log in to Azure
         uses: azure/login@v1
@@ -30,10 +35,12 @@ jobs:
           az acr login --name ${{ secrets.ACR_NAME }}
 
       - name: Build Docker Image
+        working-directory: react-hooks-frontend
         run: |
           docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest .
 
       - name: Push Docker Image to ACR
+        working-directory: react-hooks-frontend
         run: |
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
 
