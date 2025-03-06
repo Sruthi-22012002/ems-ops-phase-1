@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main  # Trigger the workflow on pull requests to main
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions
 
 jobs:
   build-and-push:
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Log in to Azure Container Registry
+      - name: Log in to Azure Container Registry (ACR)
         run: |
           echo "${{ secrets.AZURE_ACR_PASSWORD }}" | docker login ${{ secrets.AZURE_ACR_NAME }}.azurecr.io -u ${{ secrets.AZURE_ACR_USERNAME }} --password-stdin
 
@@ -25,15 +25,10 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml build
 
-      - name: Tag Docker Images
-        run: |
-          docker tag applicationimageregistry.azurecr.io/react-frontend:latest ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/react-frontend:latest
-          docker tag applicationimageregistry.azurecr.io/springboot-backend:latest ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/springboot-backend:latest
-
       - name: Push Docker Images to ACR
         run: |
-          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/react-frontend:latest
-          docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/springboot-backend:latest
+          docker push applicationimageregistry.azurecr.io/react-frontend:latest
+          docker push applicationimageregistry.azurecr.io/springboot-backend:latest
 
       - name: Log out from Docker
         run: docker logout ${{ secrets.AZURE_ACR_NAME }}.azurecr.io
