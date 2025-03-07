@@ -39,8 +39,8 @@ jobs:
 
       - name: Build Docker Images
         run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/react-frontend:latest -f ./react-hooks-frontend
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/springboot-backend:latest -f ./springboot-backend
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/react-frontend:latest -f ./react-hooks-frontend/Dockerfile ./react-hooks-frontend
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/springboot-backend:latest -f ./springboot-backend/Dockerfile ./springboot-backend
 
 
       - name: Push Docker Images to ACR
