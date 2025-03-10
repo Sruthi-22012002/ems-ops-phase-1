@@ -1,3 +1,4 @@
+# Java 17
 FROM openjdk:17-jdk-slim
 
 # Set working directory
