@@ -1,6 +1,13 @@
 FROM openjdk:17-jdk
+
 WORKDIR /app
-COPY target/*.jar target/application.jar
-RUN mv target/*.jar target/application.jar
-CMD ["java", "-jar", "target/application.jar"]
+
+# Copy JAR file and rename it directly
+COPY target/*.jar application.jar
+
+# Expose the required port
+EXPOSE 8080
+
+# Set the command to run the application
+CMD ["java", "-jar", "application.jar"]
 
