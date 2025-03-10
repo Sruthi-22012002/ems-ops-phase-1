@@ -1,10 +1,6 @@
-FROM openjdk:17-jdk-slim
-
+FROM openjdk:17-jdk
 WORKDIR /app
+COPY target/*.jar target/application.jar
+RUN mv target/*.jar target/application.jar
+CMD ["java", "-jar", "target/application.jar"]
 
-COPY target/springboot-backend-0.0.1-SNAPSHOT.jar /app/springboot-backend-0.0.1-SNAPSHOT.jar
-
-EXPOSE 8080
-
-
-ENTRYPOINT ["java", "-jar", "springboot-backend-0.0.1-SNAPSHOT.jar"]
