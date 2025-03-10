@@ -1,28 +1,23 @@
-# Stage 1: Build the JAR using Maven
-FROM maven:3.8.3-openjdk-17 AS maven_builder
+FROM openjdk:17-jdk-slim
 
+# Set working directory
 WORKDIR /app
-COPY . .  # Copy all source files to container
 
-RUN mvn clean install -DskipTests  # Build the project
-RUN mv target/*.jar target/application.jar  # Rename the JAR file
+# Install Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
-# Stage 2: Extract dependencies
-FROM openjdk:17-jdk-alpine AS builder
+# Copy the Maven project files
+COPY pom.xml .
+COPY src ./src
 
-WORKDIR /app
-COPY --from=maven_builder /app/target/application.jar ./  # Copy built JAR
-RUN java -Djarmode=layertools -jar application.jar extract  # Extract layers
+# Build the application
+RUN mvn clean package -DskipTests
 
-# Stage 3: Run the application
-FROM openjdk:17-jdk-alpine
+# Copy the built JAR file to the final location
+COPY target/springboot-backend-0.0.1-SNAPSHOT.jar /app/springboot-backend-0.0.1-SNAPSHOT.jar
 
-WORKDIR /app
-COPY --from=builder /app/dependencies/ ./  # Copy dependencies
-COPY --from=builder /app/spring-boot-loader/ ./  # Copy Spring Boot loader
-COPY --from=builder /app/snapshot-dependencies/ ./  # Copy snapshot dependencies
-COPY --from=builder /app/application/ ./  # Copy application classes
-
+# Expose the application port
 EXPOSE 8080
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 
+# Run the application
+ENTRYPOINT ["java", "-jar", "springboot-backend-0.0.1-SNAPSHOT.jar"]
