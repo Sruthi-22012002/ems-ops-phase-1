@@ -32,7 +32,7 @@ jobs:
       - name: Build and Push Docker Image (backend)
         run: |
           cd springboot-backend
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-backend:latest .
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-backend:latest ./springboot-backend
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/my-backend:latest
 
       - name: Deploy backend to Azure Container Apps
