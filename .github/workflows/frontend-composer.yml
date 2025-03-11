@@ -32,7 +32,7 @@ jobs:
       - name: Build and Push Docker Image (Frontend)
         run: |
           cd react-hooks-frontend
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-frontend:latest ./react-hooks-frontend
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-frontend:latest .
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/my-frontend:latest
 
       - name: Deploy Frontend to Azure Container Apps
