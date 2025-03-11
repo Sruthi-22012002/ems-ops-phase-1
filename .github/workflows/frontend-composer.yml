@@ -41,9 +41,11 @@ jobs:
 
           # Deploy or update the container app
           az containerapp up \
-            --name "${{ secrets.CONTAINER_APP_NAME_AUTO }}" \
-            --resource-group "${{ secrets.RESOURCE_GROUP }}" \
-            --environment "${{ secrets.CONTAINERAPPS_ENVIRONMENT }}" \
+            --name "frontend-app-container" \
+            --resource-group "ACR" \
+            --environment "managedEnvironment-ACR-9882" \
             --image "applicationimageregistry.azurecr.io/my-frontend:latest" \
             --ingress external \
-            --target-port 80
+            --target-port 80 \
+            --registry-username "applicationimageregistry" \
+            --registry-password "QwDbCRJFaqrmUzx7IV5kbUbFAMAsCW6D/TIzy/QMvf+ACRBFRAuV"
