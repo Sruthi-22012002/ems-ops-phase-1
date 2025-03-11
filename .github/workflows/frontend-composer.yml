@@ -46,4 +46,4 @@ jobs:
             --environment "${{ secrets.CONTAINERAPPS_ENVIRONMENT }}" \
             --image "applicationimageregistry.azurecr.io/my-frontend:latest" \
             --ingress external \
-            --target-port 80 \
+            --target-port 80
