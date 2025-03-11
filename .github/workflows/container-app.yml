@@ -3,7 +3,7 @@ name: Deploy to Azure React  Container Apps
 on:
   push:
     branches:
-      - main  # Change this if your branch is different
+      - main 
 
 env:
   AZURE_CONTAINER_REGISTRY: youracrname.azurecr.io
