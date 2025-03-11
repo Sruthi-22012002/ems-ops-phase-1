@@ -37,7 +37,7 @@ jobs:
 
       - name: Deploy Frontend to Azure Container Apps
         run: |
-          set -e  # Stop script if any command fails
+          set -e  
 
           # Deploy or update the container app
           az containerapp up \
@@ -46,4 +46,4 @@ jobs:
             --environment "${{ secrets.CONTAINERAPPS_ENVIRONMENT }}" \
             --image "${{ secrets.ACR_NAME }}.azurecr.io/my-frontend:latest" \
             --ingress external \
-            --target-port 3000 \
+            --target-port 80 \
