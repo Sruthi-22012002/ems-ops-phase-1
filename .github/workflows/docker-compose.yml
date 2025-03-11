@@ -1,53 +1,49 @@
-name: Build and Push Frontend & Backend to Azure ACR
+name: Build & Push to ACR
 
 on:
   push:
     branches:
-      - main  # Trigger on push to main
-  pull_request:
-    branches:
-      - main  # Trigger on PR to main
-  workflow_dispatch:  # Allows manual trigger
+      - main
 
 permissions:
-  id-token: write  # ✅ Required for Azure OIDC authentication
-  contents: read   # ✅ Required to read repo contents
+  id-token: write
+  contents: read
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    # Login to Azure using OIDC authentication
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Log in to Azure Container Registry (ACR)
-        run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
+    # Login to Azure Container Registry (ACR)
+    - name: Login to Azure Container Registry (ACR)
+      run: |
+        echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.ACR_NAME }}.azurecr.io -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
 
-      - name: Install Docker Compose  # ✅ Fix: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
+    # Build and Push Frontend Image
+    - name: Build and Push Frontend
+      run: |
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest ./react-hooks-frontend
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
 
-      - name: Build Docker Images
-        run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/react-frontend:latest -f ./react-hooks-frontend/Dockerfile ./react-hooks-frontend
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/springboot-backend:latest -f ./springboot-backend/Dockerfile ./springboot-backend
+    # Build and Push Backend Image with Database Secrets
+    - name: Build and Push Backend
+      run: |
+        docker build \
+          --build-arg DB_HOST=${{ secrets.DB_HOST }} \
+          --build-arg DB_PORT=${{ secrets.DB_PORT }} \
+          --build-arg DB_USER=${{ secrets.DB_USER }} \
+          --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+          --build-arg DB_NAME=${{ secrets.DB_NAME }} \
+          -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ./springboot-backend
 
-
-      - name: Push Docker Images to ACR
-        run: |
-          docker push ${{ secrets.ACR_NAME }}.azurecr.io/react-frontend:latest
-          docker push ${{ secrets.ACR_NAME }}.azurecr.io/springboot-backend:latest
-
-      - name: Log out from Docker
-        run: docker logout ${{ secrets.ACR_NAME }}.azurecr.io
-
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest
