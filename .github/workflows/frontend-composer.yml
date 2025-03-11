@@ -44,6 +44,6 @@ jobs:
             --name "${{ secrets.CONTAINER_APP_NAME_AUTO }}" \
             --resource-group "${{ secrets.RESOURCE_GROUP }}" \
             --environment "${{ secrets.CONTAINERAPPS_ENVIRONMENT }}" \
-            --image "${{ secrets.ACR_NAME }}.azurecr.io/my-frontend:latest" \
+            --image "applicationimageregistry.azurecr.io/my-frontend:latest" \
             --ingress external \
-            --target-port 3000 \
+            --target-port 80 \
