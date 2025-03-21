@@ -1,0 +1,49 @@
+name: Build & Push to ACR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # Login to Azure using OIDC authentication
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # Login to Azure Container Registry (ACR)
+    - name: Login to Azure Container Registry (ACR)
+      run: |
+        echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.ACR_NAME }}.azurecr.io -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+    # Build and Push Frontend Image
+    - name: Build and Push Frontend
+      run: |
+        docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest ./react-hooks-frontend
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/frontend:latest
+
+    # Build and Push Backend Image with Database Secrets
+    - name: Build and Push Backend
+      run: |
+        docker build \
+          --build-arg DB_HOST=${{ secrets.DB_HOST }} \
+          --build-arg DB_PORT=${{ secrets.DB_PORT }} \
+          --build-arg DB_USER=${{ secrets.DB_USER }} \
+          --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+          --build-arg DB_NAME=${{ secrets.DB_NAME }} \
+          -t ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest ./springboot-backend
+
+        docker push ${{ secrets.ACR_NAME }}.azurecr.io/backend:latest
