@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const EMPLOYEE_BASE_REST_API_URL = 'https://backend-container-app.salmonhill-fdb0b10f.eastus.azurecontainerapps.io/api/v1/employees';
+const EMPLOYEE_BASE_REST_API_URL = 'https://backend-springboot-application.agreeablesky-6d4c3d5a.eastasia.azurecontainerapps.io/api/1/employees';
 
 class EmployeeService{
 
