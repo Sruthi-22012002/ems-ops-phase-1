@@ -1,4 +1,4 @@
-name: Build & Push to ACR
+name: Build & Push image  to ACR
 
 on:
   push:
