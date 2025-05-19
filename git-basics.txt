@@ -1,6 +1,0 @@
-git clone 
-git init
-git branch
-git add
-git status
-git commit
